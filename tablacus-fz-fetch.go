@@ -50,7 +50,7 @@ func run(src string, dest string) int {
 	for _, path := range selected {
 		n := filepath.Base(path)
 		newPath := filepath.Join(dest, n)
-		if isValidDirPath(newPath) {
+		if isValidPath(newPath) {
 			msg := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", n)
 			ans := askUser(msg)
 			if strings.ToLower(ans) != "y" {
@@ -86,6 +86,11 @@ func askUser(prompt string) string {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	return scanner.Text()
+}
+
+func isValidPath(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 func isValidDirPath(path string) bool {
