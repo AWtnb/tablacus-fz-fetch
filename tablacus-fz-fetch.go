@@ -68,8 +68,7 @@ func run(src string, dest string) int {
 	if len(copied) < 1 {
 		return 0
 	}
-	fmt.Println()
-	if err := removeFiles(copied); err != nil {
+	if err := askRemoveFiles(copied); err != nil {
 		report(err.Error())
 	}
 	showLeftFiles(src)
@@ -166,10 +165,11 @@ func removeFile(path string) error {
 	return nil
 }
 
-func removeFiles(paths []string) error {
-	for _, path := range paths {
-		fmt.Printf("- '%s' successfully copied!\n", filepath.Base(path))
+func askRemoveFiles(paths []string) error {
+	for i, path := range paths {
+		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(paths), filepath.Base(path))
 	}
+	fmt.Printf("\nsuccessfully copied everything.\n")
 	ans := askUser("DELETE original?")
 	if strings.ToLower(ans) == "y" {
 		for _, path := range paths {
