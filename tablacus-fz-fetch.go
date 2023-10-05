@@ -27,6 +27,9 @@ func main() {
 }
 
 func run(src string, dest string) int {
+	if src == ".." {
+		src = filepath.Dir(dest)
+	}
 	if !isValidDirPath(src) {
 		report(fmt.Sprintf("invalid source-path: '%s'", src))
 		return 1
