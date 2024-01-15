@@ -134,7 +134,7 @@ func selectFilePaths(paths []string) ([]string, error) {
 	var ps []string
 	idxs, err := fuzzyfinder.FindMulti(paths, func(i int) string {
 		return filepath.Base(paths[i])
-	})
+	}, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop))
 	if err != nil {
 		return ps, err
 	}
