@@ -84,7 +84,7 @@ func report(s string) {
 }
 
 func askUser(prompt string) string {
-	fmt.Printf("%s (y/n) ", prompt)
+	fmt.Printf("%s (y/N) ", prompt)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	return scanner.Text()
