@@ -27,6 +27,9 @@ func main() {
 }
 
 func run(src string, dest string) int {
+	if src == dest {
+		return 1
+	}
 	if src == ".." {
 		src = filepath.Dir(dest)
 	}
