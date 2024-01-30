@@ -43,13 +43,6 @@ func askUser(prompt string) string {
 	return scanner.Text()
 }
 
-func removeFile(path string) error {
-	if err := os.Remove(path); err != nil {
-		return err
-	}
-	return nil
-}
-
 type Dir struct {
 	path string
 }
@@ -90,9 +83,9 @@ func (d Dir) showLeftFiles() {
 	left := d.getChildren()
 	fmt.Printf("\n[FINISHED] ")
 	if len(left) < 1 {
-		fmt.Printf("No files left on '%s'.\n", d)
+		fmt.Printf("No files left on '%s'.\n", d.path)
 	} else {
-		fmt.Printf("Left file(s) on '%s':\n", d)
+		fmt.Printf("Left file(s) on '%s':\n", d.path)
 		for _, p := range left {
 			fmt.Printf("- '%s'\n", filepath.Base(p))
 		}
@@ -100,27 +93,27 @@ func (d Dir) showLeftFiles() {
 	fmt.Scanln()
 }
 
-type SelectedFile struct {
+type File struct {
 	path string
 }
 
-func (sf SelectedFile) name() string {
-	return filepath.Base(sf.path)
+func (f File) name() string {
+	return filepath.Base(f.path)
 }
 
-func (sf SelectedFile) existsOn(dirPath string) bool {
-	p := filepath.Join(dirPath, filepath.Base(sf.path))
+func (f File) existsOn(dirPath string) bool {
+	p := filepath.Join(dirPath, filepath.Base(f.path))
 	_, err := os.Stat(p)
 	return err == nil
 }
 
-func (sf SelectedFile) copyTo(dest string) error {
-	srcFile, err := os.Open(sf.path)
+func (f File) copyTo(dest string) error {
+	srcFile, err := os.Open(f.path)
 	if err != nil {
 		return err
 	}
 	defer srcFile.Close()
-	newPath := filepath.Join(dest, filepath.Base(sf.path))
+	newPath := filepath.Join(dest, filepath.Base(f.path))
 	newFile, err := os.Create(newPath)
 	if err != nil {
 		return err
@@ -132,13 +125,13 @@ func (sf SelectedFile) copyTo(dest string) error {
 	return nil
 }
 
-type SelectedFiles struct {
+type Files struct {
 	paths []string
 }
 
-func (sfs SelectedFiles) copyFiles(dest string) (result []string, err error) {
-	for _, path := range sfs.paths {
-		sf := SelectedFile{path: path}
+func (fs Files) copyFiles(dest string) (result []string, err error) {
+	for _, path := range fs.paths {
+		sf := File{path: path}
 		if sf.existsOn(dest) {
 			msg := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", sf.name())
 			ans := askUser(msg)
@@ -153,6 +146,26 @@ func (sfs SelectedFiles) copyFiles(dest string) (result []string, err error) {
 		result = append(result, path)
 	}
 	return
+}
+
+func (fs Files) show() {
+	for i, path := range fs.paths {
+		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(fs.paths), filepath.Base(path))
+	}
+}
+
+func (fs Files) removeFiles() error {
+	fs.show()
+	ans := askUser("\nsuccessfully copied everything.\nDELETE original?")
+	if strings.ToLower(ans) != "y" {
+		return nil
+	}
+	for _, path := range fs.paths {
+		if err := os.Remove(path); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func run(src string, dest string) int {
@@ -179,7 +192,7 @@ func run(src string, dest string) int {
 		return 1
 	}
 
-	sfs := SelectedFiles{paths: selected}
+	sfs := Files{paths: selected}
 	copied, err := sfs.copyFiles(dest)
 	if err != nil {
 		report(err.Error())
@@ -188,26 +201,10 @@ func run(src string, dest string) int {
 	if len(copied) < 1 {
 		return 0
 	}
-	if err := askRemoveFiles(copied); err != nil {
+	dupls := Files{paths: copied}
+	if err := dupls.removeFiles(); err != nil {
 		report(err.Error())
 	}
 	d.showLeftFiles()
 	return 0
-}
-
-func askRemoveFiles(paths []string) error {
-	for i, path := range paths {
-		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(paths), filepath.Base(path))
-	}
-	fmt.Printf("\nsuccessfully copied everything.\n")
-	ans := askUser("DELETE original?")
-	if strings.ToLower(ans) == "y" {
-		for _, path := range paths {
-			err := removeFile(path)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
