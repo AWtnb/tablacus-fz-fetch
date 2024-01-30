@@ -26,6 +26,59 @@ func main() {
 	os.Exit(run(src, dest))
 }
 
+func isValidDirPath(path string) bool {
+	s, err := os.Stat(path)
+	return err == nil && s.IsDir()
+}
+
+func report(s string) {
+	fmt.Printf("ERROR: %s\n", s)
+	fmt.Scanln()
+}
+
+func askUser(prompt string) string {
+	fmt.Printf("%s (y/N) ", prompt)
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	return scanner.Text()
+}
+
+type Dir struct {
+	path string
+}
+
+func (d Dir) getChildren() (ps []string) {
+	fs, err := os.ReadDir(d.path)
+	if err != nil {
+		return
+	}
+	for _, f := range fs {
+		if strings.HasSuffix(f.Name(), ".ini") || strings.HasPrefix(f.Name(), "~$") || f.IsDir() {
+			continue
+		}
+		p := filepath.Join(d.path, f.Name())
+		ps = append(ps, p)
+	}
+	return
+}
+
+func (d Dir) selectFiles() (ps []string, err error) {
+	paths := d.getChildren()
+	if len(paths) < 1 {
+		return
+	}
+	idxs, err := fuzzyfinder.FindMulti(paths, func(i int) string {
+		return filepath.Base(paths[i])
+	}, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop))
+	if err != nil {
+		return
+	}
+	for _, i := range idxs {
+		ps = append(ps, paths[i])
+	}
+	return
+}
+
 func run(src string, dest string) int {
 	if src == dest {
 		return 1
@@ -41,11 +94,8 @@ func run(src string, dest string) int {
 		report(fmt.Sprintf("invalid destination-path: '%s'", dest))
 		return 1
 	}
-	ps := getChildren(src)
-	if len(ps) < 1 {
-		return 1
-	}
-	selected, err := selectFilePaths(ps)
+	d := Dir{path: src}
+	selected, err := d.selectFiles()
 	if err != nil {
 		if err != fuzzyfinder.ErrAbort {
 			report(err.Error())
@@ -81,26 +131,9 @@ func run(src string, dest string) int {
 	return 0
 }
 
-func report(s string) {
-	fmt.Printf("ERROR: %s\n", s)
-	fmt.Scanln()
-}
-
-func askUser(prompt string) string {
-	fmt.Printf("%s (y/N) ", prompt)
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	return scanner.Text()
-}
-
 func isValidPath(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
-}
-
-func isValidDirPath(path string) bool {
-	s, err := os.Stat(path)
-	return err == nil && s.IsDir()
 }
 
 func getChildren(d string) []string {
