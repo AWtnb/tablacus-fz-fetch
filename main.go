@@ -31,11 +31,22 @@ func report(s string) {
 	fmt.Scanln()
 }
 
-func askUser(prompt string) string {
-	fmt.Printf("%s (y/N) ", prompt)
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	return scanner.Text()
+type Asker struct {
+	prompt string
+	accept string
+	reject string
+}
+
+func (a Asker) option() string {
+	return fmt.Sprintf(" (%s/%s)", a.accept, strings.ToUpper(a.reject))
+}
+
+func (a Asker) accepted() bool {
+	fmt.Printf(a.prompt + a.option())
+	scn := bufio.NewScanner(os.Stdin)
+	scn.Scan()
+	s := scn.Text()
+	return strings.ToLower(s) == a.accept
 }
 
 type Dir struct {
@@ -74,18 +85,20 @@ func (d Dir) selectFiles() (ps []string, err error) {
 	return
 }
 
-func (d Dir) showLeftFiles() {
+func (d Dir) showResult() {
 	left := d.getChildren()
-	fmt.Printf("\n[FINISHED] ")
 	if len(left) < 1 {
 		fmt.Printf("No files left on '%s'.\n", d.path)
-	} else {
-		fmt.Printf("Left file(s) on '%s':\n", d.path)
-		for _, p := range left {
-			fmt.Printf("- '%s'\n", filepath.Base(p))
-		}
+		return
 	}
-	fmt.Scanln()
+	if len(left) == 1 {
+		fmt.Printf("Left file on '%s':\n- '%s'", d.path, left[0])
+		return
+	}
+	fmt.Printf("Left files on '%s':\n", d.path)
+	for i, p := range left {
+		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(left), filepath.Base(p))
+	}
 }
 
 type File struct {
@@ -128,9 +141,9 @@ func (fs Files) copyFiles(dest string) (result []string, err error) {
 	for _, path := range fs.paths {
 		sf := File{path: path}
 		if sf.existsOn(dest) {
-			msg := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", sf.name())
-			ans := askUser(msg)
-			if strings.ToLower(ans) != "y" {
+			p := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", sf.name())
+			a := Asker{prompt: p, accept: "y", reject: "n"}
+			if !a.accepted() {
 				fmt.Println("==> skipped")
 				continue
 			}
@@ -151,8 +164,9 @@ func (fs Files) show() {
 
 func (fs Files) removeFiles() error {
 	fs.show()
-	ans := askUser("\nsuccessfully copied everything.\nDELETE original?")
-	if strings.ToLower(ans) != "y" {
+	p := "\nsuccessfully copied everything.\nDELETE original?"
+	a := Asker{prompt: p, accept: "y", reject: "n"}
+	if !a.accepted() {
 		return nil
 	}
 	for _, path := range fs.paths {
@@ -192,6 +206,8 @@ func run(src string, dest string) int {
 	if err := dupls.removeFiles(); err != nil {
 		report(err.Error())
 	}
-	d.showLeftFiles()
+	fmt.Printf("\n[FINISHED] ")
+	d.showResult()
+	fmt.Scanln()
 	return 0
 }
