@@ -26,11 +26,6 @@ func main() {
 	os.Exit(run(src, dest))
 }
 
-func isValidDirPath(path string) bool {
-	s, err := os.Stat(path)
-	return err == nil && s.IsDir()
-}
-
 func report(s string) {
 	fmt.Printf("ERROR: %s\n", s)
 	fmt.Scanln()
@@ -174,14 +169,6 @@ func run(src string, dest string) int {
 	}
 	if src == ".." {
 		src = filepath.Dir(dest)
-	}
-	if !isValidDirPath(src) {
-		report(fmt.Sprintf("invalid source-path: '%s'", src))
-		return 1
-	}
-	if !isValidDirPath(dest) {
-		report(fmt.Sprintf("invalid destination-path: '%s'", dest))
-		return 1
 	}
 	d := Dir{path: src}
 	selected, err := d.selectFiles()
