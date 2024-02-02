@@ -19,7 +19,7 @@ func (d Dir) getChildren() (ps []string) {
 		return
 	}
 	for _, f := range fs {
-		if strings.HasSuffix(f.Name(), ".ini") || strings.HasPrefix(f.Name(), "~$") || f.IsDir() {
+		if strings.HasSuffix(f.Name(), ".ini") || strings.HasPrefix(f.Name(), "~$") {
 			continue
 		}
 		p := filepath.Join(d.Path, f.Name())
@@ -28,8 +28,28 @@ func (d Dir) getChildren() (ps []string) {
 	return
 }
 
+func (d Dir) getFiles() (ps []string) {
+	items := d.getChildren()
+	for _, p := range items {
+		if f, err := os.Stat(p); err == nil && !f.IsDir() {
+			ps = append(ps, p)
+		}
+	}
+	return
+}
+
+func (d Dir) getDirs() (ps []string) {
+	items := d.getChildren()
+	for _, p := range items {
+		if f, err := os.Stat(p); err == nil && f.IsDir() {
+			ps = append(ps, p)
+		}
+	}
+	return
+}
+
 func (d Dir) SelectFiles() (ps []string, err error) {
-	paths := d.getChildren()
+	paths := d.getFiles()
 	if len(paths) < 1 {
 		return
 	}
