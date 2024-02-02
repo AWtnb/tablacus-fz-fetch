@@ -7,26 +7,26 @@ import (
 )
 
 type File struct {
-	path string
+	Path string
 }
 
 func (f File) name() string {
-	return filepath.Base(f.path)
+	return filepath.Base(f.Path)
 }
 
 func (f File) existsOn(dirPath string) bool {
-	p := filepath.Join(dirPath, filepath.Base(f.path))
+	p := filepath.Join(dirPath, filepath.Base(f.Path))
 	_, err := os.Stat(p)
 	return err == nil
 }
 
 func (f File) copyTo(dest string) error {
-	srcFile, err := os.Open(f.path)
+	srcFile, err := os.Open(f.Path)
 	if err != nil {
 		return err
 	}
 	defer srcFile.Close()
-	newPath := filepath.Join(dest, filepath.Base(f.path))
+	newPath := filepath.Join(dest, filepath.Base(f.Path))
 	newFile, err := os.Create(newPath)
 	if err != nil {
 		return err

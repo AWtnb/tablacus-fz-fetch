@@ -74,14 +74,14 @@ func (d Dir) SelectItems(file bool, dir bool) (ps []string, err error) {
 func (d Dir) ShowResult() {
 	left := d.getChildren()
 	if len(left) < 1 {
-		fmt.Printf("No files left on '%s'.\n", d.Path)
+		fmt.Printf("No items left on '%s'.\n", d.Path)
 		return
 	}
 	if len(left) == 1 {
-		fmt.Printf("Left file on '%s':\n- '%s'", d.Path, left[0])
+		fmt.Printf("Left item on '%s':\n- '%s'", d.Path, left[0])
 		return
 	}
-	fmt.Printf("Left files on '%s':\n", d.Path)
+	fmt.Printf("Left items on '%s':\n", d.Path)
 	for i, p := range left {
 		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(left), filepath.Base(p))
 	}

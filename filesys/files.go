@@ -12,7 +12,7 @@ type Files struct {
 
 func (fs Files) CopyFiles(dest string) (result []string, err error) {
 	for _, path := range fs.Paths {
-		sf := File{path: path}
+		sf := File{Path: path}
 		if sf.existsOn(dest) {
 			p := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", sf.name())
 			a := Asker{prompt: p, accept: "y", reject: "n"}
