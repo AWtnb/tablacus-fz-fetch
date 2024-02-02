@@ -48,8 +48,14 @@ func (d Dir) getDirs() (ps []string) {
 	return
 }
 
-func (d Dir) SelectFiles() (ps []string, err error) {
-	paths := d.getFiles()
+func (d Dir) SelectItems(file bool, dir bool) (ps []string, err error) {
+	var paths []string
+	if file {
+		paths = append(paths, d.getFiles()...)
+	}
+	if dir {
+		paths = append(paths, d.getDirs()...)
+	}
 	if len(paths) < 1 {
 		return
 	}

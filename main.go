@@ -37,7 +37,7 @@ func run(src string, dest string) int {
 		src = filepath.Dir(dest)
 	}
 	d := filesys.Dir{Path: src}
-	selected, err := d.SelectFiles()
+	selected, err := d.SelectItems(true, false)
 	if err != nil {
 		if err != fuzzyfinder.ErrAbort {
 			report(err.Error())
