@@ -54,9 +54,16 @@ func run(src string, dest string) int {
 	if len(copied) < 1 {
 		return 0
 	}
-	dupls := filesys.Files{Paths: copied}
-	if err := dupls.RemoveFiles(); err != nil {
+	disposals := filesys.Files{Paths: copied}
+	disposals.Show()
+	p := "\nsuccessfully copied everything.\nDELETE original?"
+	a := filesys.Asker{Prompt: p, Accept: "y", Reject: "n"}
+	if !a.Accepted() {
+		return 0
+	}
+	if err := disposals.RemoveFiles(); err != nil {
 		report(err.Error())
+		return 1
 	}
 	fmt.Printf("\n[FINISHED] ")
 	d.ShowResult()

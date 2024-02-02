@@ -15,7 +15,7 @@ func (fs Files) CopyFiles(dest string) (result []string, err error) {
 		sf := File{Path: path}
 		if sf.existsOn(dest) {
 			p := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", sf.name())
-			a := Asker{prompt: p, accept: "y", reject: "n"}
+			a := Asker{Prompt: p, Accept: "y", Reject: "n"}
 			if !a.Accepted() {
 				fmt.Println("==> skipped")
 				continue
@@ -29,19 +29,13 @@ func (fs Files) CopyFiles(dest string) (result []string, err error) {
 	return
 }
 
-func (fs Files) show() {
+func (fs Files) Show() {
 	for i, path := range fs.Paths {
 		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(fs.Paths), filepath.Base(path))
 	}
 }
 
 func (fs Files) RemoveFiles() error {
-	fs.show()
-	p := "\nsuccessfully copied everything.\nDELETE original?"
-	a := Asker{prompt: p, accept: "y", reject: "n"}
-	if !a.Accepted() {
-		return nil
-	}
 	for _, path := range fs.Paths {
 		if err := os.Remove(path); err != nil {
 			return err

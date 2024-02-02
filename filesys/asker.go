@@ -8,19 +8,19 @@ import (
 )
 
 type Asker struct {
-	prompt string
-	accept string
-	reject string
+	Prompt string
+	Accept string
+	Reject string
 }
 
 func (a Asker) option() string {
-	return fmt.Sprintf(" (%s/%s)", a.accept, strings.ToUpper(a.reject))
+	return fmt.Sprintf(" (%s/%s)", a.Accept, strings.ToUpper(a.Reject))
 }
 
 func (a Asker) Accepted() bool {
-	fmt.Printf(a.prompt + a.option())
+	fmt.Printf(a.Prompt + a.option())
 	scn := bufio.NewScanner(os.Stdin)
 	scn.Scan()
 	s := scn.Text()
-	return strings.ToLower(s) == a.accept
+	return strings.ToLower(s) == strings.ToLower(a.Accept)
 }
