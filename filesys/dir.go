@@ -78,7 +78,7 @@ func (d Dir) ShowResult() {
 		return
 	}
 	if len(left) == 1 {
-		fmt.Printf("Left item on '%s':\n- '%s'", d.Path, left[0])
+		fmt.Printf("Left item on '%s':\n- '%s'\n", d.Path, filepath.Base(left[0]))
 		return
 	}
 	fmt.Printf("Left items on '%s':\n", d.Path)

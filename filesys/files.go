@@ -10,23 +10,34 @@ type Files struct {
 	Paths []string
 }
 
-func (fs Files) CopyFiles(dest string) (result []string, err error) {
+func (fs Files) GetDuplicates(dest string) (paths []string) {
 	for _, path := range fs.Paths {
-		sf := File{Path: path}
-		if sf.existsOn(dest) {
-			p := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", sf.name())
-			a := Asker{Prompt: p, Accept: "y", Reject: "n"}
-			if !a.Accepted() {
-				fmt.Println("==> skipped")
-				continue
-			}
+		f := File{Path: path}
+		if f.existsOn(dest) {
+			paths = append(paths, path)
 		}
-		if err = sf.copyTo(dest); err != nil {
-			return
-		}
-		result = append(result, path)
 	}
 	return
+}
+
+func (fs Files) GetNonDuplicates(dest string) (paths []string) {
+	for _, path := range fs.Paths {
+		f := File{Path: path}
+		if !f.existsOn(dest) {
+			paths = append(paths, path)
+		}
+	}
+	return
+}
+
+func (fs Files) CopyFiles(dest string) error {
+	for _, path := range fs.Paths {
+		sf := File{Path: path}
+		if err := sf.copyTo(dest); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (fs Files) Show() {

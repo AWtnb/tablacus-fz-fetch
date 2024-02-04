@@ -1,4 +1,4 @@
-package filesys
+package main
 
 import (
 	"bufio"
@@ -22,5 +22,5 @@ func (a Asker) Accepted() bool {
 	scn := bufio.NewScanner(os.Stdin)
 	scn.Scan()
 	s := scn.Text()
-	return strings.ToLower(s) == strings.ToLower(a.Accept)
+	return strings.EqualFold(s, a.Accept)
 }
