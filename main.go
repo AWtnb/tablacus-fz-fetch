@@ -30,8 +30,8 @@ func report(s string) {
 	fmt.Scanln()
 }
 
-func border(s string) {
-	fmt.Printf("\n======================================\n %s\n======================================\n", strings.ToUpper(s))
+func showLabel(heading string, s string) {
+	fmt.Printf("\n\n[%s] %s:\n\n", strings.ToUpper(heading), s)
 }
 
 func run(src string, dest string) int {
@@ -70,9 +70,9 @@ func run(src string, dest string) int {
 			report(err.Error())
 			return 1
 		}
-		border("successfully copied everything")
+		showLabel("done", "successfully copied everything")
 		t.Show()
-		p := "==> Delete original?"
+		p := "\n==> Delete original?"
 		a := Asker{Prompt: p, Accept: "y", Reject: "n"}
 		if a.Accepted() {
 			if err := t.RemoveFiles(); err != nil {
@@ -81,7 +81,7 @@ func run(src string, dest string) int {
 			}
 		}
 	}
-	border("finished")
+	showLabel("finished", "")
 	d.ShowResult(true, false)
 	fmt.Scanln()
 	return 0
