@@ -70,7 +70,7 @@ func run(src string, dest string) int {
 			report(err.Error())
 			return 1
 		}
-		border("successfully copied evcerything")
+		border("successfully copied everything")
 		t.Show()
 		p := "==> Delete original?"
 		a := Asker{Prompt: p, Accept: "y", Reject: "n"}
