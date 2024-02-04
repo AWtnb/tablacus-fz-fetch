@@ -71,8 +71,14 @@ func (d Dir) SelectItems(file bool, dir bool) (ps []string, err error) {
 	return
 }
 
-func (d Dir) ShowResult() {
-	left := d.getChildren()
+func (d Dir) ShowResult(file bool, dir bool) {
+	var left []string
+	if file {
+		left = append(left, d.getFiles()...)
+	}
+	if dir {
+		left = append(left, d.getDirs()...)
+	}
 	if len(left) < 1 {
 		fmt.Printf("No items left on '%s'.\n", d.Path)
 		return

@@ -82,7 +82,7 @@ func run(src string, dest string) int {
 		}
 	}
 	border("finished")
-	d.ShowResult()
+	d.ShowResult(true, false)
 	fmt.Scanln()
 	return 0
 }
