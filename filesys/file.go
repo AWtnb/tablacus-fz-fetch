@@ -15,7 +15,7 @@ func (f File) name() string {
 }
 
 func (f File) existsOn(dirPath string) bool {
-	p := filepath.Join(dirPath, filepath.Base(f.Path))
+	p := filepath.Join(dirPath, f.name())
 	_, err := os.Stat(p)
 	return err == nil
 }
@@ -26,7 +26,7 @@ func (f File) copyTo(dest string) error {
 		return err
 	}
 	defer srcFile.Close()
-	newPath := filepath.Join(dest, filepath.Base(f.Path))
+	newPath := filepath.Join(dest, f.name())
 	newFile, err := os.Create(newPath)
 	if err != nil {
 		return err
