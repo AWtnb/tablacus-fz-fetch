@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/AWtnb/tablacus-fz-fetch/dir"
 	"github.com/AWtnb/tablacus-fz-fetch/filesys"
 	"github.com/ktr0731/go-fuzzyfinder"
 )
@@ -41,7 +42,7 @@ func run(src string, dest string) int {
 	if src == ".." {
 		src = filepath.Dir(dest)
 	}
-	d := filesys.Dir{Path: src, Exception: dest}
+	d := dir.Dir{Path: src, Exception: dest}
 	selected, err := d.SelectItems()
 	if err != nil {
 		if err != fuzzyfinder.ErrAbort {
@@ -50,31 +51,32 @@ func run(src string, dest string) int {
 		return 1
 	}
 
-	scs := filesys.Children{Paths: selected}
-	dupls := scs.Dupls(dest)
+	var ets filesys.Entries
+	ets.Register(selected)
+	dupls := ets.Dupls(dest)
 	if 0 < len(dupls) {
 		for _, dp := range dupls {
 			pr := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", filepath.Base(dp))
 			a := Asker{Prompt: pr, Accept: "y", Reject: "n"}
 			if !a.Accepted() {
 				fmt.Printf("==> skipped\n")
-				scs.Drop(dp)
+				ets.Drop(dp)
 			}
 		}
 	}
-	if len(scs.Paths) < 1 {
+	if ets.Count() < 1 {
 		return 0
 	}
-	if err := scs.CopyTo(dest); err != nil {
+	if err := ets.CopyTo(dest); err != nil {
 		report(err)
 		return 1
 	}
 	showLabel("done", "successfully copied everything")
-	scs.Show()
+	ets.Show()
 	p := "\n==> Delete original?"
 	a := Asker{Prompt: p, Accept: "y", Reject: "n"}
 	if a.Accepted() {
-		if err := scs.Remove(); err != nil {
+		if err := ets.Remove(); err != nil {
 			report(err)
 			return 1
 		}

@@ -1,4 +1,4 @@
-package filesys
+package dir
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func CopyDir(src string, newPath string) error {
+func Copy(src string, newPath string) error {
 	if _, err := os.Stat(newPath); err == nil {
 		err := os.RemoveAll(newPath)
 		if err != nil {

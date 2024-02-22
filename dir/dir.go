@@ -1,4 +1,4 @@
-package filesys
+package dir
 
 import (
 	"fmt"
@@ -16,20 +16,12 @@ func MakeDir(path string) error {
 	return os.Mkdir(path, os.ModePerm)
 }
 
-type Entry struct {
-	path string
-}
-
-func (et Entry) name() string {
-	return filepath.Base(et.path)
-}
-
 type Dir struct {
 	Path      string
 	Exception string
 }
 
-func (d Dir) getChildren() (ets []Entry) {
+func (d Dir) getChildren() (paths []string) {
 	fs, err := os.ReadDir(d.Path)
 	if err != nil {
 		return
@@ -42,25 +34,24 @@ func (d Dir) getChildren() (ets []Entry) {
 		if p == d.Exception {
 			continue
 		}
-		et := Entry{path: p}
-		ets = append(ets, et)
+		paths = append(paths, p)
 	}
 	return
 }
 
 func (d Dir) SelectItems() (ps []string, err error) {
-	ets := d.getChildren()
-	if len(ets) < 1 {
+	paths := d.getChildren()
+	if len(paths) < 1 {
 		return
 	}
-	idxs, err := fuzzyfinder.FindMulti(ets, func(i int) string {
-		return ets[i].name()
+	idxs, err := fuzzyfinder.FindMulti(paths, func(i int) string {
+		return filepath.Base(paths[i])
 	}, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop))
 	if err != nil {
 		return
 	}
 	for _, i := range idxs {
-		ps = append(ps, ets[i].path)
+		ps = append(ps, paths[i])
 	}
 	return
 }
@@ -72,11 +63,11 @@ func (d Dir) ShowResult() {
 		return
 	}
 	if len(left) == 1 {
-		fmt.Printf("Left item on '%s':\n- '%s'\n", d.Path, left[0].name())
+		fmt.Printf("Left item on '%s':\n- '%s'\n", d.Path, filepath.Base(left[0]))
 		return
 	}
 	fmt.Printf("Left items on '%s':\n", d.Path)
 	for i, l := range left {
-		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(left), l.name())
+		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(left), filepath.Base(l))
 	}
 }
