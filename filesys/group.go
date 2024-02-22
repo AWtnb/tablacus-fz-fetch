@@ -45,7 +45,10 @@ func (g Group) CopyTo(dest string) error {
 	for _, ent := range g.entries {
 		if ent.isDir() {
 			np := ent.reborn(dest)
-			return dir.Copy(ent.path, np)
+			if err := dir.Copy(ent.path, np); err != nil {
+				return err
+			}
+			continue
 		}
 		if err := ent.copyTo(dest); err != nil {
 			return err
