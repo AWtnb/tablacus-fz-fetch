@@ -51,32 +51,32 @@ func run(src string, dest string) int {
 		return 1
 	}
 
-	var ets filesys.Entries
-	ets.Register(selected)
-	dupls := ets.Dupls(dest)
+	var group filesys.Group
+	group.Register(selected)
+	dupls := group.PreExists(dest)
 	if 0 < len(dupls) {
 		for _, dp := range dupls {
 			pr := fmt.Sprintf("Name duplicated: '%s'\noverwrite?", filepath.Base(dp))
 			a := Asker{Prompt: pr, Accept: "y", Reject: "n"}
 			if !a.Accepted() {
 				fmt.Printf("==> skipped\n")
-				ets.Drop(dp)
+				group.Drop(dp)
 			}
 		}
 	}
-	if ets.Count() < 1 {
+	if group.Size() < 1 {
 		return 0
 	}
-	if err := ets.CopyTo(dest); err != nil {
+	if err := group.CopyTo(dest); err != nil {
 		report(err)
 		return 1
 	}
 	showLabel("done", "successfully copied everything")
-	ets.Show()
+	group.Show()
 	p := "\n==> Delete original?"
 	a := Asker{Prompt: p, Accept: "y", Reject: "n"}
 	if a.Accepted() {
-		if err := ets.Remove(); err != nil {
+		if err := group.Remove(); err != nil {
 			report(err)
 			return 1
 		}
