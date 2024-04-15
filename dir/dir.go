@@ -39,14 +39,14 @@ func (d Dir) getChildren() (paths []string) {
 	return
 }
 
-func (d Dir) SelectItems() (ps []string, err error) {
+func (d Dir) SelectItems(query string) (ps []string, err error) {
 	paths := d.getChildren()
 	if len(paths) < 1 {
 		return
 	}
 	idxs, err := fuzzyfinder.FindMulti(paths, func(i int) string {
 		return filepath.Base(paths[i])
-	}, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop))
+	}, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop), fuzzyfinder.WithQuery(query))
 	if err != nil {
 		return
 	}

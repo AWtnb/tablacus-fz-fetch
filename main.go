@@ -43,7 +43,7 @@ func run(src string, dest string) int {
 		src = filepath.Dir(dest)
 	}
 	d := dir.Dir{Path: src, Exception: dest}
-	selected, err := d.SelectItems()
+	selected, err := d.SelectItems("")
 	if err != nil {
 		if err != fuzzyfinder.ErrAbort {
 			report(err)
