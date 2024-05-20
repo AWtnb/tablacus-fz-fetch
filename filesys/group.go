@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/AWtnb/tablacus-fz-fetch/dir"
+	"github.com/AWtnb/go-dircopy"
 )
 
 type Group struct {
@@ -45,7 +45,7 @@ func (g Group) CopyTo(dest string) error {
 	for _, ent := range g.entries {
 		if ent.isDir() {
 			np := ent.reborn(dest)
-			if err := dir.Copy(ent.path, np); err != nil {
+			if err := dircopy.Copy(ent.path, np); err != nil {
 				return err
 			}
 			continue
