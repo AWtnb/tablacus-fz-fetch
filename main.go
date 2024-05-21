@@ -57,7 +57,7 @@ func run(src string, dest string) int {
 	dupls := group.PreExists(dest)
 	if 0 < len(dupls) {
 		for _, dp := range dupls {
-			a := asker.Asker{Accept: "y", Reject: "n", Negative: true}
+			a := asker.Asker{Accept: "y", Reject: "n"}
 			a.Ask(fmt.Sprintf("Name duplicated: '%s'\noverwrite?", filepath.Base(dp)))
 			if !a.Accepted() {
 				fmt.Printf("==> skipped\n")
@@ -74,7 +74,7 @@ func run(src string, dest string) int {
 	}
 	showLabel("done", "successfully copied everything")
 	group.Show()
-	a := asker.Asker{Accept: "y", Reject: "n", Negative: true}
+	a := asker.Asker{Accept: "y", Reject: "n"}
 	a.Ask("\n==> Delete original?")
 	if a.Accepted() {
 		if err := group.Remove(); err != nil {
