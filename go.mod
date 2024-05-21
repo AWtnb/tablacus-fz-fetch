@@ -1,10 +1,9 @@
 module github.com/AWtnb/tablacus-fz-fetch
 
-go 1.21.4
-
-toolchain go1.21.10
+go 1.22.3
 
 require (
+	github.com/AWtnb/go-asker v1.0.0
 	github.com/AWtnb/go-dircopy v1.0.0
 	github.com/ktr0731/go-fuzzyfinder v0.8.0
 )
