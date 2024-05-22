@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/AWtnb/go-asker"
+	"github.com/AWtnb/go-filesys"
 	"github.com/AWtnb/tablacus-fz-fetch/dir"
-	"github.com/AWtnb/tablacus-fz-fetch/filesys"
 	"github.com/ktr0731/go-fuzzyfinder"
 )
 
@@ -52,32 +52,32 @@ func run(src string, dest string) int {
 		return 1
 	}
 
-	var group filesys.Group
-	group.Register(selected)
-	dupls := group.PreExists(dest)
+	var fes filesys.Entries
+	fes.Register(selected)
+	dupls := fes.PreExists(dest)
 	if 0 < len(dupls) {
 		for _, dp := range dupls {
 			a := asker.Asker{Accept: "y", Reject: "n"}
 			a.Ask(fmt.Sprintf("Name duplicated: '%s'\noverwrite?", filepath.Base(dp)))
 			if !a.Accepted() {
 				fmt.Printf("==> skipped\n")
-				group.Drop(dp)
+				fes.Drop(dp)
 			}
 		}
 	}
-	if group.Size() < 1 {
+	if fes.Size() < 1 {
 		return 0
 	}
-	if err := group.CopyTo(dest); err != nil {
+	if err := fes.CopyTo(dest); err != nil {
 		report(err)
 		return 1
 	}
 	showLabel("done", "successfully copied everything")
-	group.Show()
+	fes.Show()
 	a := asker.Asker{Accept: "y", Reject: "n"}
 	a.Ask("\n==> Delete original?")
 	if a.Accepted() {
-		if err := group.Remove(); err != nil {
+		if err := fes.Remove(); err != nil {
 			report(err)
 			return 1
 		}

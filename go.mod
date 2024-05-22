@@ -4,11 +4,12 @@ go 1.22.3
 
 require (
 	github.com/AWtnb/go-asker v1.0.1
-	github.com/AWtnb/go-dircopy v1.0.1
+	github.com/AWtnb/go-filesys v1.0.1
 	github.com/ktr0731/go-fuzzyfinder v0.8.0
 )
 
 require (
+	github.com/AWtnb/go-dircopy v1.0.1 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
 	github.com/gdamore/tcell/v2 v2.7.4 // indirect
 	github.com/ktr0731/go-ansisgr v0.1.0 // indirect
