@@ -47,7 +47,7 @@ func getPerm(path string) fs.FileMode {
 	for i := 0; i < len(elems); i++ {
 		ln := len(elems) - i
 		p := strings.Join(elems[0:ln], s)
-		if fs, err := os.Stat(p); fs.IsDir() && err == nil {
+		if fs, err := os.Stat(p); err == nil && fs.IsDir() {
 			return fs.Mode() & os.ModePerm
 		}
 	}
