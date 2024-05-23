@@ -4,7 +4,7 @@ go 1.22.3
 
 require (
 	github.com/AWtnb/go-asker v1.0.1
-	github.com/AWtnb/go-filesys v1.0.1
+	github.com/AWtnb/go-filesys v1.0.2
 	github.com/ktr0731/go-fuzzyfinder v0.8.0
 )
 
