@@ -2,6 +2,7 @@ package dir
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,20 +10,8 @@ import (
 	"github.com/ktr0731/go-fuzzyfinder"
 )
 
-func MakeDir(path string) error {
-	if f, err := os.Stat(path); err == nil && f.IsDir() {
-		return nil
-	}
-	return os.Mkdir(path, os.ModePerm)
-}
-
-type Dir struct {
-	Path      string
-	Exception string
-}
-
-func (d Dir) getChildren() (paths []string) {
-	fs, err := os.ReadDir(d.Path)
+func getChildItem(root string) (paths []string) {
+	fs, err := os.ReadDir(root)
 	if err != nil {
 		return
 	}
@@ -30,44 +19,71 @@ func (d Dir) getChildren() (paths []string) {
 		if strings.HasSuffix(f.Name(), ".ini") || strings.HasPrefix(f.Name(), "~$") {
 			continue
 		}
-		p := filepath.Join(d.Path, f.Name())
-		if p == d.Exception {
-			continue
-		}
+		p := filepath.Join(root, f.Name())
 		paths = append(paths, p)
 	}
 	return
 }
 
-func (d Dir) SelectItems(query string) (ps []string, err error) {
-	paths := d.getChildren()
-	if len(paths) < 1 {
+func ShowDir(path string) {
+	left := getChildItem(path)
+	if len(left) < 1 {
+		fmt.Printf("No items on '%s'.\n", path)
 		return
 	}
-	idxs, err := fuzzyfinder.FindMulti(paths, func(i int) string {
-		return filepath.Base(paths[i])
+	if len(left) == 1 {
+		fmt.Printf("Item on '%s':\n- '%s'\n", path, filepath.Base(left[0]))
+		return
+	}
+	fmt.Printf("Items on '%s':\n", path)
+	for i, l := range left {
+		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(left), filepath.Base(l))
+	}
+}
+
+func getPerm(path string) fs.FileMode {
+	s := string(os.PathSeparator)
+	elems := strings.Split(path, s)
+	for i := 0; i < len(elems); i++ {
+		ln := len(elems) - i
+		p := strings.Join(elems[0:ln], s)
+		if fs, err := os.Stat(p); fs.IsDir() && err == nil {
+			return fs.Mode() & os.ModePerm
+		}
+	}
+	return 0700
+}
+
+func Create(path string) error {
+	if f, err := os.Stat(path); err == nil && f.IsDir() {
+		return nil
+	}
+	p := getPerm(path)
+	return os.MkdirAll(path, p)
+}
+
+type Dir struct {
+	path   string
+	member []string
+}
+
+func (d *Dir) Init(path string) {
+	d.path = path
+	d.member = getChildItem(d.path)
+}
+
+func (d Dir) SelectItems(query string) (ps []string, err error) {
+	if len(d.member) < 1 {
+		return
+	}
+	idxs, err := fuzzyfinder.FindMulti(d.member, func(i int) string {
+		return filepath.Base(d.member[i])
 	}, fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionTop), fuzzyfinder.WithQuery(query))
 	if err != nil {
 		return
 	}
 	for _, i := range idxs {
-		ps = append(ps, paths[i])
+		ps = append(ps, d.member[i])
 	}
 	return
-}
-
-func (d Dir) ShowResult() {
-	left := d.getChildren()
-	if len(left) < 1 {
-		fmt.Printf("No items left on '%s'.\n", d.Path)
-		return
-	}
-	if len(left) == 1 {
-		fmt.Printf("Left item on '%s':\n- '%s'\n", d.Path, filepath.Base(left[0]))
-		return
-	}
-	fmt.Printf("Left items on '%s':\n", d.Path)
-	for i, l := range left {
-		fmt.Printf("(%d/%d) - '%s'\n", i+1, len(left), filepath.Base(l))
-	}
 }

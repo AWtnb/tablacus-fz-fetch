@@ -43,7 +43,8 @@ func run(src string, dest string) int {
 	if src == ".." {
 		src = filepath.Dir(dest)
 	}
-	d := dir.Dir{Path: src, Exception: dest}
+	var d dir.Dir
+	d.Init(src)
 	selected, err := d.SelectItems("")
 	if err != nil {
 		if err != fuzzyfinder.ErrAbort {
@@ -83,7 +84,7 @@ func run(src string, dest string) int {
 		}
 	}
 	showLabel("finished", "")
-	d.ShowResult()
+	dir.ShowDir(src)
 	fmt.Scanln()
 	return 0
 }
