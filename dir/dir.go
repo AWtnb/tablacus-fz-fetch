@@ -72,6 +72,20 @@ func (d *Dir) Init(path string) {
 	d.member = getChildItem(d.path)
 }
 
+func (d *Dir) Except(path string) {
+	paths := []string{}
+	for _, p := range d.member {
+		if p != path {
+			paths = append(paths, p)
+		}
+	}
+	d.member = paths
+}
+
+func (d Dir) Member() []string {
+	return d.member
+}
+
 func (d Dir) SelectItems(query string) (ps []string, err error) {
 	if len(d.member) < 1 {
 		return
